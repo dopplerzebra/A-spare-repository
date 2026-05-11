@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深宫普法传：凤仪天下</title>
+    <style>
+        :root {
+            --palace-red: #8b1a1a;
+            --palace-gold: #d4af37;
+            --palace-beige: #f5f0e6;
+            --palace-brown: #8b4513;
+            --palace-blue: #2c5f8a;
+            --palace-green: #556b2f;
+            --success: #2e8b57;
+            --warning: #daa520;
+            --danger: #8b0000;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'STKaiti', '楷体', 'SimSun', serif;
+            background-color: #3a2615;
+            background-image: linear-gradient(rgba(58, 38, 21, 0.9), rgba(58, 38, 21, 0.9)), 
+                            url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,0 L100,0 L100,100 L0,100 Z" fill="none" stroke="%235a3c1a" stroke-width="2"/><path d="M20,20 L80,20 L80,80 L20,80 Z" fill="none" stroke="%235a3c1a" stroke-width="1"/></svg>');
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #3a2615;
+        }
+        
+        #game-container {
+            background: var(--palace-beige);
+            width: 100%;
+            max-width: 700px;
+            padding: 25px 30px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 8px double var(--palace-red);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #game-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--palace-red), var(--palace-gold), var(--palace-red));
+        }
+        
+        h1 {
+            color: var(--palace-red);
+            text-align: center;
+            border-bottom: 3px double var(--palace-gold);
+            padding-bottom: 15px;
+            margin: 0 0 20px;
+            font-size: 2.2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--palace-brown);
+            font-size: 0.9rem;
+            margin-top: -10px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        #stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: linear-gradient(to right, #e8dfca, #d8c9a9);
+            border: 2px solid var(--palace-brown);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--palace-red);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--palace-brown);
+        }
+        
+        #scene-container {
+            position: relative;
+            min-height: 200px;
+        }
+        
+        #scene-decoration {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200"><path d="M50,10 C60,5 80,10 80,30 C80,50 50,80 50,80 C50,80 20,50 20,30 C20,10 40,5 50,10 Z" fill="%23d4af37" opacity="0.3"/><path d="M50,100 C60,95 80,100 80,120 C80,140 50,170 50,170 C50,170 20,140 20,120 C20,100 40,95 50,100 Z" fill="%238b1a1a" opacity="0.2"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right top;
+            opacity: 0.6;
+        }
+        
+        #story-text {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #3a2615;
+            margin: 0 0 25px;
+            padding-right: 20px;
+            min-height: 150px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--palace-gold);
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .choice-btn {
+            background: linear-gradient(to bottom, #f8f4e9, #e8dfca);
+            color: var(--palace-brown);
+            border: 2px solid var(--palace-brown);
+            padding: 16px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+            font-family: inherit;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .choice-btn:hover {
+            background: linear-gradient(to bottom, #fff9e6, #f0e6c9);
+            border-color: var(--palace-red);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(139, 26, 26, 0.2);
+        }
+        
+        .choice-btn::before {
+            content: "❖";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--palace-gold);
+            font-size: 1.2rem;
+        }
+        
+        .choice-btn span {
+            margin-left: 25px;
+            display: block;
+        }
+        
+        #feedback-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 240, 230, 0.98);
+            z-index: 20;
+            border-radius: 15px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        
+        .feedback-content {
+            max-width: 90%;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 3px double var(--palace-brown);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #feedback-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--palace-red);
+            border-bottom: 2px solid var(--palace-gold);
+            padding-bottom: 10px;
+        }
+        
+        .law-tip {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 18px;
+            border-radius: 10px;
+            color: #333;
+            margin: 20px 0;
+            line-height: 1.7;
+            text-align: left;
+            border-left: 4px solid var(--palace-blue);
+            font-size: 0.95rem;
+        }
+        
+        .law-tip-header {
+            font-weight: bold;
+            color: var(--palace-blue);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        #action-btn {
+            background: linear-gradient(to bottom, var(--palace-red), #6f1515);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            font-family: inherit;
+            margin-top: 15px;
+            min-width: 180px;
+            border: 2px solid var(--palace-gold);
+        }
+        
+        #action-btn:hover {
+            background: linear-gradient(to bottom, #a01e1e, var(--palace-red));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(139, 26, 26, 0.3);
+        }
+        
+        .ending-screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 240, 230, 0.98);
+            z-index: 30;
+            border-radius: 15px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            overflow-y: auto;
+        }
+        
+        .ending-content {
+            max-width: 90%;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .palace-seal {
+            width: 100px;
+            height: 100px;
+            background: var(--palace-red);
+            color: var(--palace-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 20px;
+            border: 5px double var(--palace-gold);
+            flex-shrink: 0;
+        }
+        
+        .ending-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--palace-red);
+            text-align: center;
+            width: 100%;
+        }
+        
+        .ending-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            text-align: center;
+            width: 100%;
+            max-height: 40vh;
+            overflow-y: auto;
+            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            border: 1px solid var(--palace-gold);
+        }
+        
+        .ending-law-tip {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 18px;
+            border-radius: 10px;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            text-align: left;
+            border-left: 4px solid var(--palace-blue);
+            font-size: 0.95rem;
+            width: 100%;
+            max-height: 25vh;
+            overflow-y: auto;
+        }
+        
+        .ending-law-header {
+            font-weight: bold;
+            color: var(--palace-blue);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .restart-btn {
+            background: linear-gradient(to bottom, var(--palace-blue), #1e4a6f);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: 0.3s;
+            font-family: inherit;
+            border: 2px solid var(--palace-gold);
+            flex-shrink: 0;
+        }
+        
+        .restart-btn:hover {
+            background: linear-gradient(to bottom, #3a6f9c, var(--palace-blue));
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(44, 95, 138, 0.3);
+        }
+        
+        @media (max-width: 600px) {
+            #game-container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .choice-btn {
+                padding: 14px 15px 14px 40px;
+            }
+            
+            .feedback-content {
+                padding: 20px 15px;
+            }
+            
+            .ending-title {
+                font-size: 1.6rem;
+            }
+            
+            .ending-text {
+                font-size: 1.1rem;
+                max-height: 45vh;
+            }
+            
+            .ending-law-tip {
+                max-height: 30vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>🏯 深宫普法传：凤仪天下</h1>
+    <div class="subtitle">后宫浮沉，律法为尺；家国天下，法理为纲</div>
+    
+    <div id="stats-bar">
+        <div class="stat-item">
+            <div class="stat-value" id="law-score">50</div>
+            <div class="stat-label">律法造诣</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="moral-score">50</div>
+            <div class="stat-label">德行声望</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="rank">庶妃</div>
+            <div class="stat-label">位分</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="scene-counter">1</div>
+            <div class="stat-label">关卡</div>
+        </div>
+    </div>
+    
+    <div id="scene-container">
+        <div id="scene-decoration"></div>
+        <div id="story-text"></div>
+    </div>
+    
+    <div class="button-group" id="choices"></div>
+    
+    <div id="feedback-overlay">
+        <div class="feedback-content">
+            <div id="feedback-title"></div>
+            <div class="law-tip">
+                <div class="law-tip-header">律法精要</div>
+                <div id="law-content"></div>
+            </div>
+            <button id="action-btn">继续征程</button>
+        </div>
+    </div>
+    
+    <div id="ending-screen" class="ending-screen">
+        <div class="ending-content">
+            <div class="palace-seal" id="ending-seal">👑</div>
+            <div class="ending-title" id="ending-title"></div>
+            <div class="ending-text" id="ending-text"></div>
+            <div class="ending-law-tip">
+                <div class="ending-law-header">律法总结</div>
+                <div id="ending-law"></div>
+            </div>
+            <button class="restart-btn" id="restart-btn">再入深宫</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 游戏状态
+    let currentSceneId = 'start';
+    let playerStats = {
+        lawScore: 50,      // 律法造诣 (0-100)
+        moralScore: 50,    // 德行声望 (0-100)
+        rank: 0,           // 位分等级 (0-4)
+        sceneCount: 1      // 当前关卡
+    };
+    
+    const ranks = ["庶妃", "嫔", "妃", "贵妃", "皇贵妃"];
+    
+    // 修复后的故事结构 - 确保每个next都指向有效场景
+    const story = {
+        // 起始场景
+        start: {
+            text: "深宫十载，你本是一名失宠的嫔妃。那日雪夜，你在冷宫枯井旁发现一对被遗弃的龙凤胎，婴啼声在寒风中微弱欲绝。宫人劝你莫管闲事，但你...",
+            choices: [
+                { 
+                    text: "将两个孩子悄悄带回宫中抚养，对外称是远亲遗孤", 
+                    next: "adoption_decision", 
+                    lawEffect: 10,
+                    moralEffect: 15,
+                    law: "【《民法典》第26、27条】你对未成年人主动承担监护职责，符合法律精神。但应注意，收养需符合法定条件并办理登记，否则无法建立合法收养关系。"
+                },
+                { 
+                    text: "只带走皇子，女孩交给宫中老嬷嬷照看", 
+                    next: "partial_adoption", 
+                    lawEffect: -5,
+                    moralEffect: -10,
+                    law: "【《民法典》第4、1041条】男女平等是民法基本原则。区别对待不同性别未成年人，有违平等原则，且可能构成对女童权益的实质侵害。"
+                },
+                { 
+                    text: "上报内务府处理，自己暗中接济些银两衣物", 
+                    next: "report_authorities", 
+                    lawEffect: 5,
+                    moralEffect: 5,
+                    law: "【《民法典》第34、1044条】对无民事行为能力人，向有关部门报告是履行保护义务的表现。但应注意，临时监护需确保未成年人得到妥善安置。"
+                }
+            ]
+        },
+        
+        // 分支1：收养决策
+        adoption_decision: {
+            text: "你秘密抚养两个孩子，取名明轩与明月。八年后，两人青梅竹马，感情甚笃。有老宫人见他们并非血亲，提议让他们'亲上加亲'，你如何看待此事？",
+            choices: [
+                { 
+                    text: "严词拒绝：他们已是法律上的兄妹，岂可婚配！", 
+                    next: "education_conflict", 
+                    lawEffect: 15,
+                    moralEffect: 10,
+                    law: "【《民法典》第1048条】直系血亲或三代以内旁系血亲禁止结婚。合法收养形成的拟制血亲与自然血亲适用相同禁婚规定，养兄妹结婚将导致婚姻无效。"
+                },
+                { 
+                    text: "犹豫不决：虽无血缘，但毕竟兄妹相称，需从长计议", 
+                    next: "temporary_delay", 
+                    lawEffect: 0,
+                    moralEffect: 5,
+                    law: "【《民法典》第1046、1048条】婚姻需双方完全自愿，且应符合结婚实质要件。拟制血亲间的婚姻虽无血缘障碍，但仍需审慎考虑公序良俗与社会影响。"
+                },
+                { 
+                    text: "默许发展：既无血缘，若两情相悦倒也是美事一桩", 
+                    next: "incest_scandal", 
+                    lawEffect: -20,
+                    moralEffect: -15,
+                    law: "【《民法典》第8、1048条】民事活动不得违背公序良俗。养兄妹结婚虽不违反禁婚亲规定，但可能因违背伦理道德而受到负面评价，影响婚姻效力。"
+                }
+            ]
+        },
+        
+        // 分支2：部分收养
+        partial_adoption: {
+            text: "你只收养了皇子明轩，女孩明月由老嬷嬷照看。十年后，明轩才华出众，得皇帝赏识。此时明月生母寻来，要求认回女儿，但你已对明月产生感情...",
+            choices: [
+                { 
+                    text: "同意生母带走明月，但要求定期探望", 
+                    next: "mother_reunion", 
+                    lawEffect: 10,
+                    moralEffect: 5,
+                    law: "【《民法典》第26、27条】父母是未成年子女的法定监护人。生母要求行使监护权符合法律规定，你作为实际抚养人可主张探望权。"
+                },
+                { 
+                    text: "以多年抚养为由，拒绝生母认回女儿", 
+                    next: "custody_battle", 
+                    lawEffect: -10,
+                    moralEffect: -20,
+                    law: "【《民法典》第26、27条】父母监护权优先于他人。无正当理由阻碍生母行使监护权，违反法律规定，且可能对未成年人造成心理伤害。"
+                },
+                { 
+                    text: "提议共同抚养，与生母签订书面协议", 
+                    next: "shared_custody", 
+                    lawEffect: 15,
+                    moralEffect: 10,
+                    law: "【《民法典》第27、1067条】尊重父母监护权的前提下，可通过协议约定共同抚养安排，但不得损害未成年人合法权益。"
+                }
+            ]
+        },
+        
+        // 分支3：上报内务府
+        report_authorities: {
+            text: "内务府将孩子安置于宫外善堂，你因'仁善'之名获皇帝留意，位分得以晋升。五年后，善堂遣人询问是否愿正式收养已建立感情的孩子，你...",
+            choices: [
+                { 
+                    text: "正式办理收养手续，给孩子一个家", 
+                    next: "formal_adoption", 
+                    lawEffect: 15,
+                    moralEffect: 20,
+                    law: "【《民法典》第1093、1098条】收养应有利于被收养人成长，经法定程序登记后成立合法收养关系，适用父母子女关系法律规定。"
+                },
+                { 
+                    text: "保持现状，继续以资助人身份关照", 
+                    next: "continued_support", 
+                    lawEffect: 5,
+                    moralEffect: 5,
+                    law: "【《民法典》第26、27条】未建立法定收养关系，则不产生父母子女权利义务。资助行为属道德善举，但无法律上监护责任。"
+                },
+                { 
+                    text: "请求将孩子接回宫中抚养，但不办理正式收养", 
+                    next: "informal_care", 
+                    lawEffect: -5,
+                    moralEffect: 0,
+                    law: "【《民法典》第1093-1100条】长期共同生活但未办理收养登记，可能形成事实抚养关系，但法律关系不明确，易产生权益纠纷。"
+                }
+            ]
+        },
+        
+        // 子分支：教育冲突
+        education_conflict: {
+            text: "你禁止明轩明月婚配，悉心教导二人。明轩16岁时，因与国子监祭酒之子争执，推倒对方致其受伤。对方家长要求严惩，你该如何处置？",
+            choices: [
+                { 
+                    text: "家法处置，杖责二十以平对方之怒", 
+                    next: "harsh_punishment_scene", 
+                    lawEffect: -15,
+                    moralEffect: -10,
+                    law: "【《民法典》第34、1042条】监护人应保护被监护人人身权利，禁止家庭暴力。体罚未成年人造成伤害，需承担侵权责任，严重者可撤销监护资格。"
+                },
+                { 
+                    text: "主动承担医药费，并带明轩登门赔罪", 
+                    next: "moderate_solution_scene",
+                    lawEffect: 10,
+                    moralEffect: 15,
+                    law: "【《民法典》第1188条】无/限制民事行为能力人致人损害，由监护人承担侵权责任。赔偿损失是法定义务，主动履责可减轻不良影响。"
+                },
+                { 
+                    text: "坚称对方挑衅在先，拒绝任何道歉赔偿", 
+                    next: "legal_dispute_scene",
+                    lawEffect: -20,
+                    moralEffect: -20,
+                    law: "【《民法典》第1165、1188条】侵害他人民事权益应依法担责。监护人拒绝履行赔偿义务，可能被诉至官府，承担更重法律责任。"
+                }
+            ]
+        },
+        
+        // 子分支：暂时延迟
+        temporary_delay: {
+            text: "你暂未同意婚事，但默许二人交往。三年后，明月及笄，皇帝有意将其许配给边疆将领以和亲。明月苦苦哀求，你该如何应对？",
+            choices: [
+                { 
+                    text: "恳请皇帝尊重明月意愿，拒绝和亲", 
+                    next: "defy_emperor_scene", 
+                    lawEffect: 5,
+                    moralEffect: 10,
+                    law: "【《民法典》第1042、1046条】禁止包办、买卖婚姻，结婚须双方完全自愿。尊重明月婚姻自主权，符合婚姻自由原则。"
+                },
+                { 
+                    text: "劝说明月以家国为重，接受和亲", 
+                    next: "political_marriage_scene",
+                    lawEffect: -5,
+                    moralEffect: -15,
+                    law: "【《民法典》第1042、1046条】强迫他人结婚违反婚姻自由原则。和亲若违背明月真实意愿，可能影响婚姻效力及家庭关系。"
+                },
+                { 
+                    text: "提议让明轩明月立即成婚，以绝和亲之念", 
+                    next: "rush_marriage_scene",
+                    lawEffect: -10,
+                    moralEffect: -5,
+                    law: "【《民法典》第1047、1048条】男女需达法定婚龄方可结婚。为规避和亲而仓促成婚，可能因未达婚龄或违背禁婚亲规定导致婚姻无效。"
+                }
+            ]
+        },
+        
+        // 子分支：乱伦丑闻
+        incest_scandal: {
+            text: "你默许明轩明月相恋之事渐传开，朝中御史以'乱伦悖德'参奏。皇帝震怒，命你立即处置此事以正宫闱，你决定...",
+            choices: [
+                { 
+                    text: "向皇帝陈情，坚称二人无血缘可成婚", 
+                    next: "direct_confrontation_scene",
+                    lawEffect: -25,
+                    moralEffect: -30,
+                    law: "【《民法典》第8、1048条】民事活动不得违背公序良俗。拟制血亲结婚虽不直接违法，但严重违背伦理道德，可能被认定无效。"
+                },
+                { 
+                    text: "立即将明月远嫁他乡，断绝二人联系", 
+                    next: "forced_separation_scene",
+                    lawEffect: -15,
+                    moralEffect: -25,
+                    law: "【《民法典》第1042、1046条】禁止干涉婚姻自由。强迫明月出嫁侵犯其婚姻自主权，且可能因违背真实意愿导致婚姻可撤销。"
+                },
+                { 
+                    text: "承认处置不当，请求将二人分开教养", 
+                    next: "damage_control_scene",
+                    lawEffect: 0,
+                    moralEffect: -10,
+                    law: "【《民法典》第26、27条】监护人应正确履行监护职责。及时纠正不当安排，符合未成年人最大利益原则，可避免事态恶化。"
+                }
+            ]
+        },
+        
+        // 子分支：生母团聚
+        mother_reunion: {
+            text: "明月随生母离宫，你常去探望。数年后，明轩科举中第，皇帝大悦。此时明月生母病重，临终前求你正式收养明月，你...",
+            choices: [
+                { 
+                    text: "立即办理收养手续，给明月正式名分", 
+                    next: "final_adoption_scene", 
+                    lawEffect: 20,
+                    moralEffect: 25,
+                    law: "【《民法典》第1093、1098条】生母去世后，你作为长期抚养人，符合收养条件。办理登记后可建立合法收养关系，保障明月权益。"
+                },
+                { 
+                    text: "只愿继续以姨母身份关照，不办收养", 
+                    next: "informal_guardian_scene",
+                    lawEffect: 0,
+                    moralEffect: 5,
+                    law: "【《民法典》第27、28条】未办理收养登记，则无法定监护权。但可基于长期抚养事实主张适当权利，法律关系较为模糊。"
+                },
+                { 
+                    text: "将明月送入宫中为婢，保其衣食无忧", 
+                    next: "palace_servant_scene",
+                    lawEffect: -10,
+                    moralEffect: -15,
+                    law: "【《民法典》第13、14条】明月已近成年，应尊重其自主决定权。擅自安排其人生，可能限制其人格自由发展，有违法律精神。"
+                }
+            ]
+        },
+        
+        // === 新增场景，确保每个路径都有后续 ===
+        
+        // 严厉惩罚场景
+        harsh_punishment_scene: {
+            text: "你对明轩实施家法，致其重伤。此事传入皇帝耳中，认为你虐待皇子，有损皇家体面。内务府介入调查，你面临严厉惩处...",
+            choices: [
+                { 
+                    text: "辩称此为家事，皇室无权干涉", 
+                    next: "disgrace_ending",
+                    lawEffect: -30,
+                    moralEffect: -30,
+                    law: "【《民法典》第34、1042条】家庭暴力非单纯家事，系违法行为。国家公权力可依法干预，保护未成年人免受家庭暴力侵害。"
+                },
+                { 
+                    text: "承认错误，请求从轻发落", 
+                    next: "exile_ending",
+                    lawEffect: -10,
+                    moralEffect: -20,
+                    law: "【《民法典》第1042、1068条】监护人对未成年人实施家庭暴力，依法应承担相应法律责任，包括撤销监护资格、赔偿损失等。"
+                }
+            ]
+        },
+        
+        // 温和解决方案场景
+        moderate_solution_scene: {
+            text: "你主动承担医药费并赔礼道歉，对方家长见你诚意十足，不再追究。此事传开，你以'明理大度'闻名六宫。皇帝对你刮目相看，你的位分得以晋升。",
+            choices: [
+                { 
+                    text: "借此机会请求皇帝允许明月自主择婿", 
+                    next: "marriage_autonomy_scene",
+                    lawEffect: 15,
+                    moralEffect: 20,
+                    law: "【《民法典》第1046条】结婚应当男女双方完全自愿，禁止任何一方对另一方加以强迫。婚姻自主权是公民基本权利，受法律保护。"
+                },
+                { 
+                    text: "保持低调，专心教导明轩准备科举", 
+                    next: "imperial_advisor_ending",
+                    lawEffect: 10,
+                    moralEffect: 10,
+                    law: "【《民法典》第26条】父母对未成年子女负有抚养、教育和保护的义务。专注子女教育，是履行监护职责的体现，有利于未成年人成长。"
+                }
+            ]
+        },
+        
+        // 法律纠纷场景
+        legal_dispute_scene: {
+            text: "你拒绝赔偿，对方将你告上衙门。经审理，你需承担全部医药费及赔偿，名声扫地。皇帝对此事十分不满。",
+            choices: [
+                { 
+                    text: "接受判决，支付赔偿", 
+                    next: "exile_ending", 
+                    lawEffect: -10,
+                    moralEffect: -15,
+                    law: "【《民法典》第1165、1188条】侵害他人民事权益应依法担责。监护人拒绝履行赔偿义务，经诉讼后仍须执行生效判决。"
+                }
+            ]
+        },
+        
+        // 违抗皇帝场景
+        defy_emperor_scene: {
+            text: "你冒险向皇帝进言，请求尊重明月意愿。皇帝沉思片刻，竟被你的勇气打动，同意了你的请求。你的声望在后宫大涨。",
+            choices: [
+                { 
+                    text: "趁热打铁，为明轩争取更好的教育资源", 
+                    next: "imperial_advisor_ending", 
+                    lawEffect: 20,
+                    moralEffect: 25,
+                    law: "【《民法典》第26条】父母有教育子女的权利和义务。为子女争取良好教育机会，有利于其全面发展，符合法律精神。"
+                }
+            ]
+        },
+        
+        // 政治婚姻场景
+        political_marriage_scene: {
+            text: "明月被迫和亲远嫁，终日以泪洗面。明轩也因此事与你疏远，认为你太过绝情。你在宫中越发孤立。",
+            choices: [
+                { 
+                    text: "试图修复与明轩的关系", 
+                    next: "exile_ending", 
+                    lawEffect: -5,
+                    moralEffect: -20,
+                    law: "【《民法典》第1046条】婚姻自由是基本原则。强迫婚姻不仅伤害当事人情感，也违反法律规定，可能导致家庭关系破裂。"
+                }
+            ]
+        },
+        
+        // 正式收养场景
+        formal_adoption: {
+            text: "你正式办理收养手续，给孩子一个温暖的家。孩子对你感激不尽，视你为生母。你的仁善之名传遍后宫。",
+            choices: [
+                { 
+                    text: "悉心教导孩子，希望他们成为栋梁之才", 
+                    next: "imperial_advisor_ending", 
+                    lawEffect: 20,
+                    moralEffect: 25,
+                    law: "【《民法典》第26、27条】合法收养关系确立后，养父母与养子女间的权利义务适用父母子女关系规定，你应尽到抚养、教育义务。"
+                }
+            ]
+        },
+        
+        // 继续支持场景
+        continued_support: {
+            text: "你继续保持资助人身份，时常探望孩子。孩子对你既尊敬又感激，但始终有一层隔阂。",
+            choices: [
+                { 
+                    text: "维持现状，偶尔接济", 
+                    next: "quiet_life_ending", 
+                    lawEffect: 5,
+                    moralEffect: 10,
+                    law: "【《民法典》第26条】未建立法定收养关系，则无法定监护义务。你的资助行为属道德善举，值得肯定但无法定权利。"
+                }
+            ]
+        },
+        
+        // 婚姻自主场景
+        marriage_autonomy_scene: {
+            text: "皇帝允许明月自主择婿。明月感激你的帮助，最终选择了一位品行端正的年轻官员。明轩也顺利通过科举，前途无量。",
+            choices: [
+                { 
+                    text: "为明轩的仕途铺路", 
+                    next: "imperial_advisor_ending", 
+                    lawEffect: 15,
+                    moralEffect: 20,
+                    law: "【《民法典》第26条】父母有教育子女的义务。支持子女事业发展，是履行监护职责的延伸，符合法律与社会期待。"
+                }
+            ]
+        },
+        
+        // 监护权之争场景
+        custody_battle: {
+            text: "你拒绝明月生母的请求，双方对簿公堂。最终衙门判决生母胜诉，明月被带走。明轩也因此事对你产生隔阂。",
+            choices: [
+                { 
+                    text: "接受判决，反思己过", 
+                    next: "exile_ending", 
+                    lawEffect: -15,
+                    moralEffect: -25,
+                    law: "【《民法典》第27条】父母是未成年子女的法定监护人。无正当理由阻碍生母行使监护权，违反法律规定，也违背未成年人最佳利益原则。"
+                }
+            ]
+        },
+        
+        // 共享监护权场景
+        shared_custody: {
+            text: "你与明月生母签订书面协议，共同抚养明月。明月得以同时享受生母的关爱和你的教导，健康成长。",
+            choices: [
+                { 
+                    text: "继续履行协议，悉心教导明月", 
+                    next: "royal_favor_ending", 
+                    lawEffect: 20,
+                    moralEffect: 25,
+                    law: "【《民法典》第27、1067条】通过协议约定共同抚养安排，符合法律规定，有利于未成年人利益最大化，体现了法律的灵活性与人文关怀。"
+                }
+            ]
+        },
+        
+        // 结局场景
+        imperial_advisor_ending: {
+            type: "ending",
+            title: "🏛️ 结局：一品诰命·律法大家",
+            text: "你深谙律法之道，以法理平衡人情，以智慧化解危机。明轩官至尚书，明月成为女官首领。皇帝钦赐'律法大家'匾额，你以庶妃之身获封一品诰命，著书立说，泽被后世。深宫沉浮，终以法理明灯照亮前路。\n\n在你的教导下，明轩成为朝廷重臣，以公正严明闻名；明月则成为第一位女官领袖，推动后宫法制改革。皇帝晚年常与你探讨律法，你的见解深深影响了朝廷的法制建设。",
+            law: "你正确运用《民法典》监护、婚姻、继承等制度，平衡权利义务，既维护家庭和谐，又保障个人权益，体现了法律对公序良俗与人文关怀的兼顾。你的选择展示了法律不仅是约束行为的规范，更是保护权益、促进和谐的保障。"
+        },
+        
+        royal_favor_ending: {
+            type: "ending",
+            title: "👑 结局：皇恩浩荡·后宫之主",
+            text: "你以仁德感化六宫，以智慧周旋前朝。明轩成为驸马，明月嫁与亲王。皇帝感念你教化之功，册封为皇贵妃，摄六宫事。虽非律法专家，但以德行赢得尊荣，深宫之中，善心终得善果。\n\n你的仁德之名传遍朝野，后宫在你的治理下井井有条。明轩与公主琴瑟和鸣，明月与亲王相敬如宾，子孙满堂，家族昌盛。晚年皇帝独宠于你，六宫无人不服。",
+            law: "你虽未精研律法条文，但秉持《民法典》平等、自愿、公平原则行事，符合法律倡导的社会主义核心价值观，在框架内实现了各方利益平衡。你的经历证明，合法合规的行为最终会得到法律的保护与社会的认可。"
+        },
+        
+        exile_ending: {
+            type: "ending",
+            title: "🏮 结局：冷宫余生·孤灯长伴",
+            text: "你多次决策失误，既违律法，又失人心。明轩因你错误教导卷入朝争被贬，明月被迫和亲远嫁。皇帝震怒，将你废为庶人，永居冷宫。深宫长夜，唯有孤灯相伴，悔不当初。\n\n冷宫岁月漫长，你时常反思过往，若当初能多懂些律法，或许能避免许多错误。明轩在边疆苦寒之地了此残生，明月在异国他乡郁郁而终。家族因你蒙羞，子孙后代都抬不起头。",
+            law: "你多次违反《民法典》监护职责、婚姻自由、禁止家庭暴力等规定，未能妥善平衡各方权益，导致家庭关系破裂，终受法律与命运的双重审判。这个结局警示我们，忽视法律、违背法理，最终会付出沉重代价。"
+        },
+        
+        disgrace_ending: {
+            type: "ending",
+            title: "⚖️ 结局：法理难容·身败名裂",
+            text: "你公然挑战律法底线，虐待养子、强迫婚姻、侵吞财产，桩桩件件触犯律法。御史联名弹劾，皇帝下旨彻查。最终，你被剥夺封号，家族蒙羞，囚于宗人府。深宫之中，法理终胜私情。\n\n你的罪行被记录在案，成为后宫反面教材。明轩与你断绝关系，明月不认你这个养母。曾经的风光烟消云散，余生在牢狱中悔恨度日，成为普法教育的典型案例。",
+            law: "你严重违反《民法典》多项强制性规定，包括但不限于侵犯人身权、财产权、婚姻自主权等，最终承担相应法律后果，体现了'法不容情'的司法原则。这个结局深刻说明，任何挑战法律底线的行为，终将受到法律的严惩。"
+        },
+        
+        quiet_life_ending: {
+            type: "ending",
+            title: "🌿 结局：平淡是真·深宫归隐",
+            text: "你避开深宫纷争，不争不抢，不求显达。明轩成为地方小吏，明月嫁与寻常书生。你自请离宫，隐居京郊。虽无荣华富贵，但得平安喜乐。深宫岁月，终化作田园炊烟，平淡是真。\n\n在京郊的小院里，你种花养草，偶尔教导村中孩童识字。明轩和明月时常携孙辈探望，虽无大富大贵，但家庭和睦，其乐融融。回首深宫岁月，你庆幸自己选择了这条平凡之路。",
+            law: "你在法律框架内做出稳健选择，虽未充分运用法律争取权益，但亦未触犯法律底线，体现了民法'法无禁止即可为'的私法自治精神，保障了基本安宁。这个结局告诉我们，在法律允许的范围内，每个人都有权选择适合自己的生活方式。"
+        },
+        
+        // 以下为简化场景，确保每个路径都有后续
+        final_adoption_scene: {
+            text: "你正式收养明月，她对你感激不尽。明轩也对你更加敬重。孩子们都成长为优秀人才，你的晚年幸福美满。",
+            choices: [
+                { 
+                    text: "享受天伦之乐，安度晚年", 
+                    next: "royal_favor_ending", 
+                    lawEffect: 15,
+                    moralEffect: 20,
+                    law: "【《民法典》第26、27条】履行监护职责，建立和谐家庭关系，符合法律精神与社会伦理，是家庭幸福的基石。"
+                }
+            ]
+        },
+        
+        informal_guardian_scene: {
+            text: "你以姨母身份继续关照明月，关系融洽但略显疏远。明月成年后嫁为人妇，时常回宫探望你。",
+            choices: [
+                { 
+                    text: "接受这种关系，平淡度日", 
+                    next: "quiet_life_ending", 
+                    lawEffect: 5,
+                    moralEffect: 10,
+                    law: "【《民法典》第26条】未建立法定收养关系，则不产生法定父母子女权利义务。你与明月的关系基于情感而非法律，体现了人情的温暖。"
+                }
+            ]
+        }
+    };
+    
+    // 根据属性决定下一个场景
+    function getNextSceneBasedOnStats(option1, option2) {
+        if (playerStats.lawScore >= 70 && playerStats.moralScore >= 60) {
+            return option1; // 好结局路径
+        } else if (playerStats.lawScore <= 30 && playerStats.moralScore <= 40) {
+            return "disgrace_ending"; // 坏结局路径
+        } else {
+            return option2; // 普通路径
+        }
+    }
+    
+    // 检查是否触发结局
+    function checkForEnding() {
+        // 基于属性值的结局判定
+        if (playerStats.lawScore >= 80 && playerStats.moralScore >= 80) {
+            return "imperial_advisor_ending";
+        } else if (playerStats.moralScore >= 85 && playerStats.lawScore >= 50) {
+            return "royal_favor_ending";
+        } else if (playerStats.lawScore <= 20 && playerStats.moralScore <= 20) {
+            return "disgrace_ending";
+        } else if (playerStats.lawScore <= 40 && playerStats.moralScore <= 40) {
+            return "exile_ending";
+        } else if (playerStats.sceneCount >= 8) {
+            return "quiet_life_ending";
+        }
+        return null; // 无结局触发
+    }
+    
+    // 更新属性显示
+    function updateStatsDisplay() {
+        document.getElementById('law-score').textContent = playerStats.lawScore;
+        document.getElementById('moral-score').textContent = playerStats.moralScore;
+        document.getElementById('rank').textContent = ranks[Math.min(playerStats.rank, ranks.length-1)];
+        document.getElementById('scene-counter').textContent = playerStats.sceneCount;
+    }
+    
+    // 更新位分
+    function updateRank() {
+        if (playerStats.lawScore >= 80 && playerStats.moralScore >= 80) {
+            playerStats.rank = 4; // 皇贵妃
+        } else if (playerStats.lawScore >= 70 && playerStats.moralScore >= 70) {
+            playerStats.rank = 3; // 贵妃
+        } else if (playerStats.lawScore >= 60 && playerStats.moralScore >= 60) {
+            playerStats.rank = 2; // 妃
+        } else if (playerStats.lawScore >= 50 && playerStats.moralScore >= 50) {
+            playerStats.rank = 1; // 嫔
+        } else {
+            playerStats.rank = 0; // 庶妃
+        }
+    }
+    
+    // 渲染场景
+    function renderScene(sceneId) {
+        currentSceneId = sceneId;
+        const scene = story[sceneId];
+        
+        if (!scene) {
+            console.error("场景不存在:", sceneId);
+            // 如果场景不存在，跳转到起始场景
+            renderScene('start');
+            return;
+        }
+        
+        // 检查是否触发结局
+        const ending = checkForEnding();
+        if (ending && story[ending]) {
+            showEnding(ending);
+            return;
+        }
+        
+        document.getElementById('story-text').textContent = scene.text;
+        const choiceContainer = document.getElementById('choices');
+        choiceContainer.innerHTML = '';
+        
+        if (scene.type === "ending") {
+            showEnding(sceneId);
+            return;
+        }
+        
+        if (scene.choices && scene.choices.length > 0) {
+            scene.choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.innerHTML = `<span>${choice.text}</span>`;
+                btn.onclick = () => handleChoice(choice);
+                choiceContainer.appendChild(btn);
+            });
+        } else {
+            // 如果没有选项，显示重新开始按钮
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerHTML = '<span>重新开始游戏</span>';
+            btn.onclick = () => {
+                resetGame();
+                renderScene('start');
+            };
+            choiceContainer.appendChild(btn);
+        }
+        
+        updateStatsDisplay();
+    }
+    
+    // 处理选择
+    function handleChoice(choice) {
+        // 更新属性
+        playerStats.lawScore = Math.max(0, Math.min(100, playerStats.lawScore + choice.lawEffect));
+        playerStats.moralScore = Math.max(0, Math.min(100, playerStats.moralScore + choice.moralEffect));
+        playerStats.sceneCount++;
+        
+        // 更新位分
+        updateRank();
+        
+        // 显示反馈
+        showFeedback(choice);
+    }
+    
+    // 显示反馈
+    function showFeedback(choice) {
+        const overlay = document.getElementById('feedback-overlay');
+        const title = document.getElementById('feedback-title');
+        const law = document.getElementById('law-content');
+        const actionBtn = document.getElementById('action-btn');
+        
+        // 根据选择影响设置反馈标题
+        if (choice.lawEffect > 0 && choice.moralEffect > 0) {
+            title.textContent = "✅ 德法兼备";
+            title.style.color = "var(--success)";
+        } else if (choice.lawEffect < 0 && choice.moralEffect < 0) {
+            title.textContent = "⚠️ 德法两失";
+            title.style.color = "var(--danger)";
+        } else if (choice.lawEffect > 0 && choice.moralEffect < 0) {
+            title.textContent = "⚖️ 法理为上";
+            title.style.color = "var(--palace-blue)";
+        } else if (choice.lawEffect < 0 && choice.moralEffect > 0) {
+            title.textContent = "💖 情理为先";
+            title.style.color = "var(--warning)";
+        } else {
+            title.textContent = "➡️ 平波无澜";
+            title.style.color = "var(--palace-brown)";
+        }
+        
+        law.textContent = choice.law;
+        
+        // 确定下一个场景
+        let nextScene = choice.next;
+        
+        // 如果next是一个函数，执行它以获取实际的下一个场景
+        if (typeof nextScene === 'function') {
+            nextScene = getNextSceneBasedOnStats(nextScene);
+        }
+        
+        // 确保下一个场景存在
+        if (!story[nextScene]) {
+            console.error("下一个场景不存在:", nextScene);
+            nextScene = 'start';
+        }
+        
+        actionBtn.onclick = () => {
+            overlay.style.display = 'none';
+            renderScene(nextScene);
+        };
+        
+        overlay.style.display = 'flex';
+    }
+    
+    // 显示结局
+    function showEnding(endingId) {
+        const ending = story[endingId];
+        if (!ending) {
+            console.error("结局不存在:", endingId);
+            return;
+        }
+        
+        const endingScreen = document.getElementById('ending-screen');
+        const endingSeal = document.getElementById('ending-seal');
+        const endingTitle = document.getElementById('ending-title');
+        const endingText = document.getElementById('ending-text');
+        const endingLaw = document.getElementById('ending-law');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        // 设置结局内容
+        endingTitle.textContent = ending.title;
+        endingText.textContent = ending.text;
+        endingLaw.textContent = ending.law;
+        
+        // 设置结局印章
+        if (endingId.includes('imperial_advisor')) {
+            endingSeal.textContent = "⚖️";
+            endingSeal.style.background = "linear-gradient(135deg, var(--palace-blue), var(--palace-gold))";
+        } else if (endingId.includes('royal_favor')) {
+            endingSeal.textContent = "👑";
+            endingSeal.style.background = "linear-gradient(135deg, var(--palace-gold), var(--palace-red))";
+        } else if (endingId.includes('disgrace') || endingId.includes('exile')) {
+            endingSeal.textContent = "🔒";
+            endingSeal.style.background = "linear-gradient(135deg, #666, #333)";
+        } else {
+            endingSeal.textContent = "🍂";
+            endingSeal.style.background = "linear-gradient(135deg, var(--palace-green), var(--palace-brown))";
+        }
+        
+        // 隐藏选择按钮
+        document.getElementById('choices').innerHTML = '';
+        endingScreen.style.display = 'flex';
+        
+        // 添加滚动到顶部的功能
+        endingScreen.scrollTop = 0;
+    }
+    
+    // 重置游戏
+    function resetGame() {
+        playerStats = {
+            lawScore: 50,
+            moralScore: 50,
+            rank: 0,
+            sceneCount: 1
+        };
+    }
+    
+    // 初始化游戏
+    document.addEventListener('DOMContentLoaded', () => {
+        // 绑定重启按钮事件
+        document.getElementById('restart-btn').onclick = function() {
+            resetGame();
+            document.getElementById('ending-screen').style.display = 'none';
+            renderScene('start');
+        };
+        
+        // 开始游戏
+        renderScene('start');
+    });
+</script>
+
+</body>
+</html>
